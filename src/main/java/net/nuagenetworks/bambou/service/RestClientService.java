@@ -32,11 +32,12 @@ import java.security.NoSuchAlgorithmException;
 import java.net.HttpRetryException;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
@@ -64,6 +65,7 @@ import net.nuagenetworks.bambou.ssl.DynamicKeystoreGenerator;
 import net.nuagenetworks.bambou.ssl.NaiveHostnameVerifier;
 import net.nuagenetworks.bambou.ssl.X509NaiveTrustManager;
 import net.nuagenetworks.bambou.util.BambouUtils;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class RestClientService {
@@ -73,6 +75,10 @@ public class RestClientService {
     private RestOperations restOperations;
 
     public void prepareSSLAuthentication(String certificateContent, String privateKeyContent) {
+        RestTemplate restTemplate = (RestTemplate) restOperations;
+        HttpComponentsClientHttpRequestFactory requestFactory =
+                (HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory();
+
         try {
             // Create a trust manager that doesn't validate cert chains
             TrustManager[] trustAllCerts = new TrustManager[] { new X509NaiveTrustManager() };
@@ -88,13 +94,14 @@ public class RestClientService {
             }
 
             sc.init(keyManagers, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             // Create host verifier
             HostnameVerifier allHostsValid = new NaiveHostnameVerifier();
 
             // Install the host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            CloseableHttpClient httpclient =
+                    HttpClients.custom().setSSLContext(sc).setSSLHostnameVerifier(allHostsValid).build();
+            requestFactory.setHttpClient(httpclient);
         } catch (NoSuchAlgorithmException ex) {
             logger.error("Error", ex);
         } catch (KeyManagementException ex) {

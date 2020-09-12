@@ -40,46 +40,46 @@ public class RestClientTemplate extends RestTemplate {
 
     private static final int DEFAULT_SOCKET_TIMEOUT_IN_MS = 60 * 1000;
 
-    public RestClientTemplate() throws NoSuchAlgorithmException, KeyManagementException {
+    public RestClientTemplate() {
         super(new HttpComponentsClientHttpRequestFactory());
-        init();
+//        init();
         setSocketTimeout(DEFAULT_SOCKET_TIMEOUT_IN_MS);
         ResponseErrorHandlerImpl responseErrorHandler = new ResponseErrorHandlerImpl();
         setErrorHandler(responseErrorHandler);
     }
 
-    private void init() throws NoSuchAlgorithmException, KeyManagementException {
-        HttpComponentsClientHttpRequestFactory requestFactory =
-                (HttpComponentsClientHttpRequestFactory) getRequestFactory();
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] x509Certificates,
-                                                   String s) {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) {
-                    }
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                }
-        };
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-            @Override
-            public boolean verify(String s, SSLSession sslSession) {
-                return true;
-            }
-        };
-        CloseableHttpClient httpclient =
-                HttpClients.custom().setSSLContext(sslContext).setSSLHostnameVerifier(hostnameVerifier).build();
-        requestFactory.setHttpClient(httpclient);
-    }
+//    private void init() throws NoSuchAlgorithmException, KeyManagementException {
+//        HttpComponentsClientHttpRequestFactory requestFactory =
+//                (HttpComponentsClientHttpRequestFactory) getRequestFactory();
+//        TrustManager[] trustAllCerts = new TrustManager[]{
+//                new X509TrustManager() {
+//                    @Override
+//                    public void checkClientTrusted(java.security.cert.X509Certificate[] x509Certificates,
+//                                                   String s) {
+//                    }
+//
+//                    @Override
+//                    public void checkServerTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) {
+//                    }
+//
+//                    @Override
+//                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+//                        return null;
+//                    }
+//                }
+//        };
+//        SSLContext sslContext = SSLContext.getInstance("TLS");
+//        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+//        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+//            @Override
+//            public boolean verify(String s, SSLSession sslSession) {
+//                return true;
+//            }
+//        };
+//        CloseableHttpClient httpclient =
+//                HttpClients.custom().setSSLContext(sslContext).setSSLHostnameVerifier(hostnameVerifier).build();
+//        requestFactory.setHttpClient(httpclient);
+//    }
 
     public void setSocketTimeout(int socketTimeout) {
         if (socketTimeout > 0) {

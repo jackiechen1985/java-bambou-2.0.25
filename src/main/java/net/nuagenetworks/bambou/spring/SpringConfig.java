@@ -33,16 +33,12 @@ import org.springframework.web.client.RestOperations;
 
 import net.nuagenetworks.bambou.service.RestClientTemplate;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-
 @Configuration
 @ComponentScan("net.nuagenetworks")
 public class SpringConfig {
 
     @Bean
-    public RestOperations restOperations() throws NoSuchAlgorithmException, KeyManagementException {
+    public RestOperations restOperations() {
         return new RestClientTemplate();
     }
 }
